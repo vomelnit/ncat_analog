@@ -1,10 +1,14 @@
 # ncat_analog
 
 # TODO:
-  1.Write code for UDP sockets
+  1.Write server for UDP connection
+
   2.Refactoring
+
   3.Exception handling
+
   4.Comments/docs
+
   5.Write unit test (optional)
 
 How to build and execute project:
@@ -15,5 +19,5 @@ $ ./ncat_analog -h
 or
 $./ncat_analog --help
 
-Example of usage:
+Example of usage: 
 $./ncat_analog --port 2020 -s 127.0.0.1

@@ -4,6 +4,8 @@ void serverActivate(int port, std::string addr, int protocol){
     server serverStruct;
     serverStruct = initServerStruct(port, addr, protocol);
     int valread, activity, new_socket, currentSocket;
+    struct sockaddr_in newSocketAddress, disconnSocketAddress;
+    socklen_t newSocketAddrLen,disconnAddrLen;
 
     serverStruct.master_socket = initSocketOnListeningMode(serverStruct.ipVersion,
     serverStruct.protocolType, serverStruct.opt, serverStruct.sockLevel, serverStruct.optname, serverStruct.address);
@@ -15,7 +17,7 @@ void serverActivate(int port, std::string addr, int protocol){
         serverStruct.max_sd = serverStruct.master_socket;
 
         for (int i = 0 ; i < serverStruct.max_clients ; i++){
-            currentSocket = serverStruct.client_socket[i];
+            currentSocket = serverStruct.clientSocket[i].socketDescriptor;
             if(currentSocket > 0)
                 FD_SET( currentSocket , &serverStruct.readfds);
             if(currentSocket > serverStruct.max_sd)
@@ -29,37 +31,41 @@ void serverActivate(int port, std::string addr, int protocol){
 
         if (FD_ISSET(serverStruct.master_socket, &serverStruct.readfds)){
             if ((new_socket = accept(serverStruct.master_socket,
-              (struct sockaddr *)&serverStruct.address, (socklen_t*)&serverStruct.addrlen))<0){
+              (struct sockaddr *)&newSocketAddress, (socklen_t*)&newSocketAddrLen))<0){
                 perror("accept");
                 exit(EXIT_FAILURE);
             }
 
-            printConnectionMsgs(new_socket,serverStruct.address);
-
             for (int i = 0; i < serverStruct.max_clients; i++){
-                if( serverStruct.client_socket[i] == 0 ){
-                    serverStruct.client_socket[i] = new_socket;
+                if( serverStruct.clientSocket[i].socketDescriptor == 0 ){
+                    serverStruct.clientSocket[i].socketDescriptor = new_socket;
+                    serverStruct.clientSocket[i].socketAddress = newSocketAddress;
+                    serverStruct.clientSocket[i].clientAddrlen = newSocketAddrLen;
+                    printConnectionMsgs(new_socket, newSocketAddress);
                     break;
                 }
+                if (send(new_socket, "Refused due to max num of clients now", strlen("Refused due to max num of clients now"),
+                 0) != strlen("Refused due to max num of clients now")) perror("Refuse to connect");
             }
+
         }
 
         for (int i = 0; i < serverStruct.max_clients; i++){
-            currentSocket = serverStruct.client_socket[i];
+            currentSocket = serverStruct.clientSocket[i].socketDescriptor;
             if (FD_ISSET( currentSocket , &serverStruct.readfds)){
                 if ((valread = read( currentSocket , serverStruct.buffer, BUFFER_SIZE_BYTES-1)) == 0){
-                    getpeername(currentSocket , (struct sockaddr*)&serverStruct.address ,
-                      (socklen_t*)&serverStruct.addrlen);
-                    std::cout<<"Host disconnected , ip "<<inet_ntoa(serverStruct.address.sin_addr)<<
-                      " , port "<<ntohs(serverStruct.address.sin_port)<<'\n';
+                    getpeername(currentSocket , (struct sockaddr*)&disconnSocketAddress ,
+                      (socklen_t*)&disconnAddrLen);
+                    std::cout<<"Host disconnected , ip "<<inet_ntoa(disconnSocketAddress.sin_addr)<<
+                      " , port "<<ntohs(disconnSocketAddress.sin_port)<<'\n';
 
                     close( currentSocket );
-                    serverStruct.client_socket[i] = 0;
+                    serverStruct.clientSocket[i].socketDescriptor = 0;
                 }
                 else{
                     serverStruct.buffer[valread] = '\0';
                     if (currentSocket == 0) {
-                        sendBufferToAllClients(serverStruct.buffer,serverStruct.max_clients,serverStruct.client_socket);
+                        sendBufferToAllClients(serverStruct.buffer,serverStruct.max_clients,serverStruct.clientSocket);
                     }
                     else std::cout << serverStruct.buffer;
 
@@ -85,7 +91,7 @@ server initServerStruct(int port, std::string addressStr, int protocol){
     serverInitStruct.addrlen = sizeof(serverInitStruct.address);
 
     for (int i = 0; i < serverInitStruct.max_clients; i++){
-        serverInitStruct.client_socket[i] = 0;
+        serverInitStruct.clientSocket[i].socketDescriptor = 0;
     }
 
     if (protocol == 0) serverInitStruct.protocolType = SOCK_STREAM;
@@ -134,10 +140,10 @@ void printConnectionMsgs(int connectedSocket,struct sockaddr_in address){
     }
 }
 
-void sendBufferToAllClients(char buffer[BUFFER_SIZE_BYTES],int max_clients,int client_socket[MAX_CLIENT_AMOUNT]){
+void sendBufferToAllClients(char buffer[BUFFER_SIZE_BYTES],int max_clients,clientSocketData client_socket[MAX_CLIENT_AMOUNT]){
     for (int i = 0; i < max_clients; i++){
-        if (client_socket[i]!=0){
-            send(client_socket[i] , buffer , strlen(buffer) , 0 );
+        if (client_socket[i].socketDescriptor!=0){
+            send(client_socket[i].socketDescriptor , buffer , strlen(buffer) , 0 );
         }
     }
 }

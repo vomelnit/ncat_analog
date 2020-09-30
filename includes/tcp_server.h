@@ -15,29 +15,32 @@
 
 # define TRUE   1
 # define FALSE  0
-# define PORT 9999
+//# define PORT 9999
 # define MAX_CLIENT_AMOUNT 5
 # define BUFFER_SIZE_BYTES 1025
+
+typedef struct{
+    int socketDescriptor;
+    socklen_t clientAddrlen;
+    struct sockaddr_in socketAddress;
+} clientSocketData;
 
 typedef struct {
   int opt;
   int master_socket;
   int addrlen;
-  int new_socket;
   int client_socket[MAX_CLIENT_AMOUNT];
   int max_clients;
-  int activity;
-  int valread;
-  int sd;
   int max_sd;
   struct sockaddr_in address;
   char buffer[BUFFER_SIZE_BYTES];
   fd_set readfds;
-  fd_set writefds;
+  //fd_set writefds;
   int protocolType;
   int ipVersion;
   int sockLevel;
   int optname;
+  clientSocketData clientSocket[MAX_CLIENT_AMOUNT];
 
 } server;
 
@@ -49,6 +52,6 @@ int initSocketOnListeningMode(int ipVersion, int protocolType, int opt, int sock
 
 void printConnectionMsgs(int connectedSocket, struct sockaddr_in address);
 
-void sendBufferToAllClients(char buffer[BUFFER_SIZE_BYTES],int max_clients,int client_socket[MAX_CLIENT_AMOUNT]);
+void sendBufferToAllClients(char buffer[BUFFER_SIZE_BYTES],int max_clients,clientSocketData client_socket[MAX_CLIENT_AMOUNT]);
 
 #endif

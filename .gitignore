@@ -1,2 +1,3 @@
 *.o
-help.txt
+resources/*.txt
+*/resources/*.txt
