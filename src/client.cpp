@@ -39,17 +39,13 @@ void clientActivate(int port, std::string addressStr, int protocol){
 
 
         if (FD_ISSET(0, &client.readfds)){
-            //std::cout << "I/O" << '\n';
             valread = read(0 , client.buffer, BUFFER_SIZE_BYTES-1);
-            std::cout << "valread"<<valread << '\n';
             client.buffer[valread] = '\0';
 
             if (client.protocolType == SOCK_STREAM){
-                // std::cout << "buffer: " << client.buffer;
                 send(client.clientSocket, client.buffer, strlen(client.buffer), 0 );
             }
             else if (client.protocolType == SOCK_DGRAM){
-              std::cout << "/* message */" << '\n';
                 sendto(client.clientSocket, client.buffer, strlen(client.buffer),MSG_CONFIRM,
                   (const struct sockaddr *) &client.connectSocket[0].Address, client.connectSocket[0].AddrLen);
             }

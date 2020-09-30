@@ -4,11 +4,18 @@
 # include <fstream>
 # include <sstream>
 # include <string>
-  using namespace std;
 # include <iostream>
+using namespace std;
 
+//! Print filedata in console file using filepath
+/*!
+  \param filepath a std::string.
+*/
   void printFileByPath(std::string filepath);
 
+  //! Print in console --help text
+  /*!
+  */
   void printHelpCmd();
 
 
