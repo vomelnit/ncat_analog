@@ -13,8 +13,11 @@ INCLUDES  = ./includes
 
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
+$(TARGET): $(OBJ) $(TARGET_DIR)
 	$(CC) -o $(TARGET) $(CFLAGS) $(SRC) -I $(INCLUDES) #-ltermcap
+
+$(TARGET_DIR):
+	test ! -d $(TARGET_DIR) && mkdir $(TARGET_DIR)
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -o $@ -c $< -I $(INCLUDES)

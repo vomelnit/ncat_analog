@@ -1,7 +1,15 @@
-#include <fstream>
-#include <sstream>
-#include <string>
-using namespace std;
-#include <iostream>
+#ifndef FILE_FUNC_H
+# define FILE_FUNC_H
 
-void printFileByPath(std::string filepath);
+# include <fstream>
+# include <sstream>
+# include <string>
+  using namespace std;
+# include <iostream>
+
+  void printFileByPath(std::string filepath);
+
+  void printHelpCmd();
+
+
+#endif

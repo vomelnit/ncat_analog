@@ -8,7 +8,7 @@
 cmdOptions getCmdOptions(int argc,char** argv){
   cmdOptions cmdOpt;
   cmdOpt = createDefaultCmdOptionsStructure();
-  std::string helpFileResolPath ("resources/help.txt");
+  //std::string helpFileResolPath ("../resources/help.txt");
   const char* short_options = "us:p:lr:w:h";
 
 	const struct option long_options[] = {
@@ -78,7 +78,8 @@ cmdOptions getCmdOptions(int argc,char** argv){
 
       case 'h': {
         std::cout << "--help" << '\n';
-        printFileByPath(helpFileResolPath);
+        printHelpCmd();
+        //printFileByPath(helpFileResolPath);
         exit(EXIT_SUCCESS);
 				break;
 			};
@@ -97,7 +98,7 @@ cmdOptions getCmdOptions(int argc,char** argv){
 cmdOptions createDefaultCmdOptionsStructure(){
   cmdOptions defaultCmdOpt;
   defaultCmdOpt.protocol = tcp;
-  defaultCmdOpt.addr = "127.0.0.0";
+  defaultCmdOpt.addr = "127.0.0.1";
   defaultCmdOpt.port = 0;
   defaultCmdOpt.filename = "";
   defaultCmdOpt.isListeningMode = true;
