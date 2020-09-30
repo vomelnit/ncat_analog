@@ -7,34 +7,46 @@ void clientActivate(int port, std::string addressStr, int protocol){
     client.clientSocket = connectSocketToServer(client.ipVersion, client.protocolType, client.connAddress);
 
     while(true){
-            FD_ZERO(&client.readfds);
-            FD_SET(0, &client.readfds);
-            FD_SET(client.clientSocket, &client.readfds);
-            client.max_sd = client.clientSocket;
+        FD_ZERO(&client.readfds);
+        FD_SET(0, &client.readfds);
+        FD_SET(client.clientSocket, &client.readfds);
+        client.max_sd = client.clientSocket;
 
-            activity = select(client.max_sd + 1, &client.readfds, NULL, NULL, NULL);
-            if (activity < 0){
-                perror("Client Select:");
-                exit(EXIT_FAILURE);
+        activity = select(client.max_sd + 1, &client.readfds, NULL, NULL, NULL);
+        if (activity < 0){
+            perror("Client Select:");
+            exit(EXIT_FAILURE);
+        }
+
+        if (FD_ISSET(client.clientSocket, &client.readfds)){
+            valread = read( client.clientSocket , client.buffer, BUFFER_SIZE_BYTES-1);
+            if (valread == 0) {
+                close(client.clientSocket);
+                std::cout << "Host disconnected" << '\n';
+                exit(EXIT_SUCCESS);
             }
+            else if (valread>0){
+            client.buffer[valread] = '\0';
+            std::cout << client.buffer;
+            }
+            else {
+              std::cout << "Read message length with negative value" << '\n';
+              exit(EXIT_FAILURE);
+            }
+        }
 
-                if (FD_ISSET(client.clientSocket, &client.readfds)){
-                  valread = read( client.clientSocket , client.buffer, BUFFER_SIZE_BYTES-1);
-                  if (valread == 0) {
-                      close(client.clientSocket);
-                      std::cout << "Host disconnected" << '\n';
-                      exit(EXIT_SUCCESS);
-                  }
-                  if (valread>0){
-                      client.buffer[valread] = '\0';
-                      std::cout << client.buffer;
-                  }
-                }
-                if (FD_ISSET(0, &client.readfds)){
-                    valread = read(0 , client.buffer, BUFFER_SIZE_BYTES-1);
-                    client.buffer[valread] = '\0';
-                    send(client.clientSocket, client.buffer, strlen(client.buffer), 0 );
-                  }
+        if (FD_ISSET(0, &client.readfds)){
+            valread = read(0 , client.buffer, BUFFER_SIZE_BYTES-1);
+            client.buffer[valread] = '\0';
+
+            if (client.protocolType == SOCK_STREAM){
+                send(client.clientSocket, client.buffer, strlen(client.buffer), 0 );
+            }
+            else if (client.protocolType == SOCK_DGRAM){
+                sendto(client.clientSocket, client.buffer, strlen(client.buffer),MSG_CONFIRM,
+                  (const struct sockaddr *) &client.connAddress, sizeof(client.connAddress));
+            }
+        }
       }
 }
 
@@ -48,7 +60,7 @@ clientStruct initClientStruct(int port, std::string addressStr, int protocol){
 
     if (protocol == 0) clientInit.protocolType = SOCK_STREAM;
     else if (protocol == 1) clientInit.protocolType = SOCK_DGRAM;
-    else std::cout << "Wrong protocol" << '\n';
+    else std::cout << "Protocol must be SOCK_STREAM or SOCK_DGRAM" << '\n';
 
     return clientInit;
 }
@@ -60,10 +72,16 @@ int connectSocketToServer(int ipVersion, int protocolType, struct sockaddr_in ad
         exit(EXIT_FAILURE);
     }
 
-    if (connSocket = connect(clientSocket, (struct sockaddr *)&address, sizeof(address)) < 0){
-        perror("SocketConnect:");
+    if (protocolType == SOCK_STREAM) {
+        if (connSocket = connect(clientSocket, (struct sockaddr *)&address, sizeof(address)) < 0){
+            perror("SocketConnect");
+            exit(EXIT_FAILURE);
+        }
+        return clientSocket;
+    }
+    else if (protocolType == SOCK_DGRAM) return clientSocket;
+    else {
+        std::cout << "Protocol must be SOCK_STREAM or SOCK_DGRAM" << '\n';
         exit(EXIT_FAILURE);
     }
-    std::cout <<"ConnSocket"<< connSocket << '\n';
-    return clientSocket;
 }

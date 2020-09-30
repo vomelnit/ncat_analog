@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra #-Werror
 SRC = ./src/main.cpp \
 	./src/cmd_argument_analyzer.cpp \
 	./src/file_func.cpp \
-	./src/server.cpp \
+	./src/tcp_server.cpp \
 	./src/client.cpp\
 
 OBJ = $(SRC:.cpp=.o)
