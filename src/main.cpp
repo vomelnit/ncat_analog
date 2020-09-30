@@ -1,6 +1,7 @@
 //#include <iostream>
 #include "cmd_argument_analyzer.h"
 #include "server.h"
+#include "client.h"
 using namespace std;
 
 
@@ -16,7 +17,8 @@ int main(int argc, char** argv)
     // std::cout <<"addr: " << cmdOpt.addr << '\n';
     // std::cout <<"fileUseMode: " << cmdOpt.fileUseMode << '\n';
     // std::cout <<"filename: " << cmdOpt.filename << '\n';
-
-    serverActivation(cmdOpt.port, cmdOpt.addr, cmdOpt.protocol);
+    if (cmdOpt.isListeningMode == true) serverActivate(cmdOpt.port, cmdOpt.addr, cmdOpt.protocol);
+    else if (cmdOpt.isListeningMode == false) clientActivate(cmdOpt.port, cmdOpt.addr, cmdOpt.protocol);
+    else cout<<"Wrong ListeningMode\n";
     return 0;
 }

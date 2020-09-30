@@ -41,7 +41,7 @@ typedef struct {
 
 } server;
 
-void serverActivation(int port, std::string addr, int protocol);
+void serverActivate(int port, std::string addr, int protocol);
 
 server initServerStruct(int port, std::string address, int protocol);
 

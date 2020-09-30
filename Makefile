@@ -7,6 +7,7 @@ SRC = ./src/main.cpp \
 	./src/cmd_argument_analyzer.cpp \
 	./src/file_func.cpp \
 	./src/server.cpp \
+	./src/client.cpp\
 
 OBJ = $(SRC:.cpp=.o)
 INCLUDES  = ./includes

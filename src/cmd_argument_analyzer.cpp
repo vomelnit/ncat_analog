@@ -101,7 +101,7 @@ cmdOptions createDefaultCmdOptionsStructure(){
   defaultCmdOpt.addr = "127.0.0.1";
   defaultCmdOpt.port = 0;
   defaultCmdOpt.filename = "";
-  defaultCmdOpt.isListeningMode = true;
+  defaultCmdOpt.isListeningMode = false;
   defaultCmdOpt.fileUseMode = noFile;
 
   return defaultCmdOpt;

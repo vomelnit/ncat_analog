@@ -1,9 +1,9 @@
 #include "server.h"
 
-void serverActivation(int port, std::string addr, int protocol){
+void serverActivate(int port, std::string addr, int protocol){
       server serverStruct;
       serverStruct = initServerStruct(port, addr, protocol);
-      int valread,activity,new_socket, currentSocket;
+      int valread, activity, new_socket, currentSocket;
 
       serverStruct.master_socket = initSocketOnListeningMode(serverStruct.ipVersion,
          serverStruct.protocolType, serverStruct.opt, serverStruct.sockLevel, serverStruct.optname, serverStruct.address);
@@ -66,7 +66,7 @@ void serverActivation(int port, std::string addr, int protocol){
                   {
                       serverStruct.buffer[valread] = '\0';
                       if (currentSocket == 0) {
-                        sendBufferToAllClients(serverStruct.buffer,serverStruct.max_clients,serverStruct.client_socket);
+                          sendBufferToAllClients(serverStruct.buffer,serverStruct.max_clients,serverStruct.client_socket);
                       }
                       else std::cout << serverStruct.buffer;
 
