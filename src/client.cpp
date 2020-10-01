@@ -1,7 +1,7 @@
 #include "client.h"
 
 void clientActivate(int port, std::string addressStr, int protocol){
-    int activity, valread;
+    int activity, valread, errflags;
     clientStruct client;
     client = initClientStruct(port, addressStr, protocol);
     client.clientSocket = connectSocketToServer(client.ipVersion, client.protocolType, client.connectSocket[0].Address);
@@ -39,11 +39,29 @@ void clientActivate(int port, std::string addressStr, int protocol){
 
 
         if (FD_ISSET(0, &client.readfds)){
-            valread = read(0 , client.buffer, BUFFER_SIZE_BYTES-1);
+
+            if ((valread = read(0 , client.buffer, BUFFER_SIZE_BYTES-1)) != BUFFER_SIZE_BYTES) {
+                if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                    printf("%s\n", errno == EAGAIN ? "EAGAIN" : "EWOULDBLOCK");
+                    sleep(5);
+                }
+                else {
+                    std::cout << "buffer: " <<client.buffer<<"| valread = "<< valread<<'\n';
+                    if(errno != 0) printf("errno %d\n", errno);
+                }
+            }
             client.buffer[valread] = '\0';
 
             if (client.protocolType == SOCK_STREAM){
-                send(client.clientSocket, client.buffer, strlen(client.buffer), 0 );
+                if ((send(client.clientSocket, client.buffer, strlen(client.buffer), 0)) != BUFFER_SIZE_BYTES) {
+                    if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                        printf("%s\n", errno == EAGAIN ? "EAGAIN" : "EWOULDBLOCK");
+                        sleep(5);
+                    }
+                    else {
+                        printf("errno %d\n", errno);
+                    }
+                }
             }
             else if (client.protocolType == SOCK_DGRAM){
                 sendto(client.clientSocket, client.buffer, strlen(client.buffer),MSG_CONFIRM,

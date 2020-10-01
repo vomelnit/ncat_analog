@@ -54,7 +54,6 @@ typedef struct {
   \param addr a std::string.
   \param protocol an integer argument.
 */
-*/
 void serverActivate(int port, std::string addr, int protocol);
 
 //! Initialized struct server's fiels
